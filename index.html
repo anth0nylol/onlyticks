@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OnlyTicks Journal — Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #06050a;
+  --bg-elev: #0c0a15;
+  --bg-card: #110d1c;
+  --bg-card-hi: #1a1430;
+  --border: #1f1a30;
+  --border-hi: #2e2545;
+  --text: #ece6f5;
+  --text-dim: #8b7ba4;
+  --text-mute: #5a4a72;
+  --magenta: #b026ff;
+  --magenta-glow: rgba(176, 38, 255, 0.4);
+  --green: #39ff14;
+  --green-glow: rgba(57, 255, 20, 0.35);
+  --red: #ff2e5e;
+  --red-glow: rgba(255, 46, 94, 0.35);
+  --purple: #74487a;
+  --slate: #2f3c42;
+  --cyan: #5cc8ff;
+  --gold: #ffc933;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  background-image:
+    linear-gradient(rgba(176, 38, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(176, 38, 255, 0.025) 1px, transparent 1px);
+  background-size: 60px 60px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.mono { font-family: 'JetBrains Mono', monospace; }
+.serif { font-family: 'DM Serif Display', serif; }
+.display { font-family: 'Anton', sans-serif; letter-spacing: 0.02em; text-transform: uppercase; }
+
+.green { color: var(--green); }
+.red { color: var(--red); }
+.dim { color: var(--text-dim); }
+.mute { color: var(--text-mute); }
+
+/* ============ TOP NAV ============ */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(6, 5, 10, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+.topbar-inner {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 14px 32px;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+.brand {
+  font-family: 'Anton', sans-serif;
+  font-size: 20px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: linear-gradient(180deg, #f0e8ff 0%, #b8a8d9 60%, #6e5a8f 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+}
+.brand-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--magenta);
+  border-radius: 50%;
+  box-shadow: 0 0 12px var(--magenta-glow);
+}
+.brand .sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-mute);
+  letter-spacing: 0.2em;
+  margin-left: 4px;
+  font-weight: 400;
+}
+.topnav {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+}
+.topnav a {
+  padding: 8px 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  text-decoration: none;
+  border-radius: 6px;
+  transition: color 0.15s, background 0.15s;
+}
+.topnav a:hover { color: var(--text); background: rgba(176, 38, 255, 0.08); }
+.topnav a.active {
+  color: var(--magenta);
+  background: rgba(176, 38, 255, 0.1);
+  text-shadow: 0 0 12px var(--magenta-glow);
+}
+.account-switcher {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  border: 1px solid var(--border-hi);
+  border-radius: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  cursor: pointer;
+}
+.account-switcher .dot { width: 6px; height: 6px; background: var(--green); border-radius: 50%; box-shadow: 0 0 8px var(--green-glow); }
+.account-switcher .chev { color: var(--text-mute); margin-left: 4px; }
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--magenta), var(--purple));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 12px;
+  color: #fff;
+}
+
+/* ============ LAYOUT ============ */
+main { max-width: 1440px; margin: 0 auto; padding: 0 32px 80px; }
+.screen-section { padding-top: 56px; }
+.screen-section + .screen-section { border-top: 1px dashed var(--border); margin-top: 56px; }
+.screen-label {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+.screen-label-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: var(--magenta);
+  text-transform: uppercase;
+  text-shadow: 0 0 12px var(--magenta-glow);
+}
+.screen-label-name {
+  font-family: 'Anton', sans-serif;
+  font-size: 36px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+.screen-label-hint {
+  margin-left: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-mute);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+/* ============ METRIC STRIP ============ */
+.metric-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 24px;
+}
+.metric {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px 20px;
+  position: relative;
+  overflow: hidden;
+}
+.metric::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(176, 38, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(176, 38, 255, 0.04) 1px, transparent 1px);
+  background-size: 20px 20px;
+  pointer-events: none;
+}
+.metric > * { position: relative; }
+.metric-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-mute);
+  margin-bottom: 8px;
+}
+.metric-value {
+  font-family: 'Anton', sans-serif;
+  font-size: 32px;
+  line-height: 1;
+  letter-spacing: 0.01em;
+}
+.metric-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.metric-spark {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  opacity: 0.7;
+}
+.metric.positive { border-color: rgba(57, 255, 20, 0.25); }
+.metric.positive .metric-value { color: var(--green); text-shadow: 0 0 16px var(--green-glow); }
+.metric.negative .metric-value { color: var(--red); }
+.metric.accent { border-color: rgba(176, 38, 255, 0.3); box-shadow: 0 0 24px rgba(176, 38, 255, 0.1); }
+
+/* ============ CARDS / GENERAL ============ */
+.grid-2 { display: grid; grid-template-columns: 1.6fr 1fr; gap: 20px; }
+.grid-2-eq { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 22px;
+}
+.card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+.card-title {
+  font-family: 'Anton', sans-serif;
+  font-size: 18px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.card-meta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-mute);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+/* ============ CALENDAR ============ */
+.cal {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  font-family: 'JetBrains Mono', monospace;
+}
+.cal-head {
+  font-size: 10px;
+  color: var(--text-mute);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-align: center;
+  padding: 6px 0;
+}
+.cal-day {
+  aspect-ratio: 1.15 / 1;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  transition: border-color 0.15s;
+  cursor: pointer;
+}
+.cal-day:hover { border-color: var(--magenta); }
+.cal-day.out { opacity: 0.25; }
+.cal-day-num { font-size: 11px; color: var(--text-dim); }
+.cal-day-pnl { font-size: 13px; font-weight: 700; }
+.cal-day-cnt { font-size: 9px; color: var(--text-mute); letter-spacing: 0.1em; }
+.cal-day.win { background: rgba(57, 255, 20, 0.06); border-color: rgba(57, 255, 20, 0.2); }
+.cal-day.win .cal-day-pnl { color: var(--green); }
+.cal-day.win-strong { background: rgba(57, 255, 20, 0.1); border-color: rgba(57, 255, 20, 0.35); box-shadow: inset 0 0 12px rgba(57, 255, 20, 0.08); }
+.cal-day.win-strong .cal-day-pnl { color: var(--green); text-shadow: 0 0 8px var(--green-glow); }
+.cal-day.loss { background: rgba(255, 46, 94, 0.06); border-color: rgba(255, 46, 94, 0.2); }
+.cal-day.loss .cal-day-pnl { color: var(--red); }
+.cal-day.loss-strong { background: rgba(255, 46, 94, 0.1); border-color: rgba(255, 46, 94, 0.35); }
+.cal-day.loss-strong .cal-day-pnl { color: var(--red); }
+.cal-day.today { box-shadow: 0 0 0 2px var(--magenta); }
+
+/* ============ ACCOUNT CARD ============ */
+.acct-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 22px;
+  position: relative;
+  overflow: hidden;
+}
+.acct-card.featured {
+  border-color: rgba(176, 38, 255, 0.4);
+  box-shadow: 0 0 32px rgba(176, 38, 255, 0.08);
+}
+.acct-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+.acct-name {
+  font-family: 'Anton', sans-serif;
+  font-size: 22px;
+  letter-spacing: 0.02em;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+.acct-name .firm { color: var(--text-dim); font-size: 13px; display: block; letter-spacing: 0.12em; margin-bottom: 4px; }
+.acct-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+}
+.acct-badge.live { color: var(--green); background: rgba(57, 255, 20, 0.08); }
+.acct-badge.eval { color: var(--gold); background: rgba(255, 201, 51, 0.08); }
+.acct-equity {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-bottom: 4px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.acct-equity-val {
+  font-family: 'Anton', sans-serif;
+  font-size: 38px;
+  letter-spacing: 0.01em;
+  line-height: 1;
+}
+.acct-equity-delta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  margin-left: 8px;
+}
+.acct-rules { margin-top: 22px; display: flex; flex-direction: column; gap: 14px; }
+.rule {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.rule-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+}
+.rule-label { color: var(--text-dim); letter-spacing: 0.1em; text-transform: uppercase; }
+.rule-value { color: var(--text); font-weight: 600; }
+.rule-value .target { color: var(--text-mute); margin-left: 4px; }
+.rule-bar {
+  height: 6px;
+  background: var(--bg-elev);
+  border-radius: 999px;
+  overflow: hidden;
+  position: relative;
+}
+.rule-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.4s;
+}
+.rule-bar-fill.safe { background: linear-gradient(90deg, var(--green), #1ec47f); }
+.rule-bar-fill.warn { background: linear-gradient(90deg, var(--gold), #f0a000); }
+.rule-bar-fill.danger { background: linear-gradient(90deg, var(--red), #c4203f); }
+.rule-bar-fill.accent { background: linear-gradient(90deg, var(--magenta), var(--purple)); box-shadow: 0 0 8px var(--magenta-glow); }
+.rule-note {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-mute);
+  letter-spacing: 0.05em;
+}
+
+/* ============ TABLE ============ */
+.tbl { width: 100%; border-collapse: collapse; font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+.tbl th {
+  text-align: left;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-mute);
+  font-weight: 500;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.tbl td { padding: 12px; border-bottom: 1px solid var(--border); }
+.tbl tr:last-child td { border-bottom: none; }
+.tbl tr:hover td { background: rgba(176, 38, 255, 0.04); }
+.tbl .ts { color: var(--text-dim); }
+.tbl .sym { color: var(--text); font-weight: 600; letter-spacing: 0.05em; }
+.tbl .side-long { color: var(--green); font-size: 10px; letter-spacing: 0.15em; }
+.tbl .side-short { color: var(--red); font-size: 10px; letter-spacing: 0.15em; }
+.tbl .pnl-pos { color: var(--green); font-weight: 600; }
+.tbl .pnl-neg { color: var(--red); font-weight: 600; }
+.tag-chip {
+  display: inline-block;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 3px 7px;
+  border-radius: 4px;
+  background: rgba(176, 38, 255, 0.1);
+  border: 1px solid rgba(176, 38, 255, 0.3);
+  color: var(--magenta);
+  margin-right: 4px;
+}
+.tag-chip.green {
+  background: rgba(57, 255, 20, 0.08);
+  border-color: rgba(57, 255, 20, 0.3);
+  color: var(--green);
+}
+.tag-chip.cyan {
+  background: rgba(92, 200, 255, 0.08);
+  border-color: rgba(92, 200, 255, 0.3);
+  color: var(--cyan);
+}
+.tag-chip.gold {
+  background: rgba(255, 201, 51, 0.08);
+  border-color: rgba(255, 201, 51, 0.3);
+  color: var(--gold);
+}
+
+/* ============ FULL CALENDAR ============ */
+.cal-full .cal-day { aspect-ratio: 1.2 / 1; padding: 10px; }
+.cal-full .cal-day-pnl { font-size: 15px; }
+.cal-toolbar { display: flex; align-items: center; gap: 12px; }
+.cal-toolbar .month {
+  font-family: 'Anton', sans-serif;
+  font-size: 24px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.cal-toolbar .nav-btn {
+  width: 32px; height: 32px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+  display: flex; align-items: center; justify-content: center;
+}
+.cal-toolbar .nav-btn:hover { border-color: var(--magenta); color: var(--text); }
+.cal-summary {
+  display: flex;
+  gap: 24px;
+  margin-left: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+}
+.cal-summary .item { display: flex; flex-direction: column; gap: 2px; }
+.cal-summary .item .lbl { color: var(--text-mute); letter-spacing: 0.16em; text-transform: uppercase; font-size: 10px; }
+.cal-summary .item .val { font-size: 16px; font-weight: 700; font-family: 'Anton', sans-serif; letter-spacing: 0.01em; }
+
+/* ============ JOURNAL ENTRY ============ */
+.journal-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; }
+.trade-detail {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.trade-head {
+  padding: 22px 24px;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(176, 38, 255, 0.05), transparent);
+}
+.trade-row { display: flex; align-items: center; gap: 16px; margin-bottom: 8px; }
+.trade-sym {
+  font-family: 'Anton', sans-serif;
+  font-size: 30px;
+  letter-spacing: 0.04em;
+}
+.trade-side {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 6px 12px;
+  border-radius: 6px;
+}
+.trade-side.long { color: var(--green); background: rgba(57, 255, 20, 0.1); border: 1px solid rgba(57, 255, 20, 0.3); }
+.trade-pnl {
+  margin-left: auto;
+  font-family: 'Anton', sans-serif;
+  font-size: 28px;
+}
+.trade-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+.trade-stat .lbl {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-mute);
+  margin-bottom: 4px;
+}
+.trade-stat .val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  font-weight: 600;
+}
+.trade-chart-placeholder {
+  height: 280px;
+  background:
+    linear-gradient(180deg, var(--bg-elev) 0%, var(--bg-card) 100%);
+  background-image:
+    linear-gradient(rgba(176, 38, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(176, 38, 255, 0.05) 1px, transparent 1px);
+  background-size: 30px 30px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.trade-chart-placeholder .label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text-mute);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+.trade-tags { padding: 16px 24px; border-bottom: 1px solid var(--border); }
+.trade-tags .lbl { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-mute); margin-bottom: 8px; }
+.journal-pane {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+}
+.journal-pane .lbl { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-mute); margin-bottom: 12px; }
+.journal-text {
+  flex: 1;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--text);
+}
+.journal-text p { margin-bottom: 12px; }
+.journal-text em { color: var(--magenta); font-style: italic; }
+.journal-text strong { color: var(--green); font-weight: 700; }
+.journal-footer {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-mute);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  display: flex;
+  justify-content: space-between;
+}
+
+/* ============ STATS ============ */
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 20px;
+}
+.chart-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 22px;
+}
+.chart-wrap { height: 240px; position: relative; }
+.chart-wrap svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.kpi-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.kpi {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 18px;
+}
+.kpi .lbl { font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-mute); margin-bottom: 6px; }
+.kpi .val { font-family: 'Anton', sans-serif; font-size: 26px; letter-spacing: 0.01em; line-height: 1; }
+.kpi .delta { font-family: 'JetBrains Mono', monospace; font-size: 10px; margin-top: 4px; color: var(--text-dim); }
+
+.setup-bars { display: flex; flex-direction: column; gap: 12px; }
+.setup-bar {
+  display: grid;
+  grid-template-columns: 140px 1fr 60px;
+  align-items: center;
+  gap: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+}
+.setup-bar .nm { color: var(--text); }
+.setup-bar .bar { height: 10px; background: var(--bg-elev); border-radius: 999px; overflow: hidden; position: relative; }
+.setup-bar .fill { height: 100%; background: linear-gradient(90deg, var(--magenta), var(--purple)); border-radius: 999px; box-shadow: 0 0 8px var(--magenta-glow); }
+.setup-bar .pct { text-align: right; color: var(--text-dim); }
+
+.tod-bars { display: flex; gap: 6px; height: 160px; align-items: flex-end; padding-top: 16px; }
+.tod-bar {
+  flex: 1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.tod-bar .barv {
+  width: 100%;
+  border-radius: 4px 4px 0 0;
+  position: relative;
+}
+.tod-bar .barv.pos { background: linear-gradient(180deg, var(--green), rgba(57, 255, 20, 0.4)); box-shadow: 0 0 12px var(--green-glow); }
+.tod-bar .barv.neg { background: linear-gradient(180deg, var(--red), rgba(255, 46, 94, 0.4)); }
+.tod-bar .lbl { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--text-mute); letter-spacing: 0.08em; }
+
+/* ============ PAYOUTS ============ */
+.payout-strip .metric.gold { border-color: rgba(255, 201, 51, 0.3); }
+.payout-strip .metric.gold .metric-value { color: var(--gold); text-shadow: 0 0 16px rgba(255, 201, 51, 0.4); }
+
+.payout-progress {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 22px;
+  margin-top: 20px;
+}
+.payout-acct-row {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 1.2fr;
+  gap: 20px;
+  align-items: center;
+  padding: 16px 0;
+  border-top: 1px solid var(--border);
+}
+.payout-acct-row:first-of-type { border-top: none; padding-top: 0; }
+.payout-acct-row:last-of-type { padding-bottom: 0; }
+.payout-acct-name {
+  font-family: 'Anton', sans-serif;
+  font-size: 16px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+.payout-acct-name .firm { display: block; font-size: 10px; color: var(--text-dim); letter-spacing: 0.16em; }
+.payout-acct-row .lbl { font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-mute); margin-bottom: 2px; }
+.payout-acct-row .val { font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 600; }
+.payout-status {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  border: 1px solid currentColor;
+}
+.payout-status.ready { color: var(--green); background: rgba(57, 255, 20, 0.08); }
+.payout-status.locked { color: var(--gold); background: rgba(255, 201, 51, 0.08); }
+.payout-status.waiting { color: var(--text-dim); background: rgba(139, 123, 164, 0.08); }
+
+/* ============ BANNER ============ */
+.preview-banner {
+  background: linear-gradient(90deg, rgba(176, 38, 255, 0.15), rgba(57, 255, 20, 0.08));
+  border-bottom: 1px solid rgba(176, 38, 255, 0.3);
+  padding: 10px 32px;
+  text-align: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+.preview-banner strong { color: var(--magenta); margin-right: 6px; text-shadow: 0 0 8px var(--magenta-glow); }
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 1100px) {
+  .metric-strip { grid-template-columns: repeat(2, 1fr); }
+  .grid-2, .grid-2-eq, .journal-grid, .stats-grid { grid-template-columns: 1fr; }
+  .topnav { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="preview-banner"><strong>// DESIGN PROTOTYPE</strong> Visual mockup · not functional · OnlyTicks Journal v0 — KrabsLab × Anthony's Lab</div>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <span class="brand-dot"></span>
+      OT JOURNAL <span class="sub">// v0</span>
+    </div>
+    <nav class="topnav">
+      <a href="#dashboard" class="active">Dashboard</a>
+      <a href="#calendar">Calendar</a>
+      <a href="#accounts">Accounts</a>
+      <a href="#journal">Journal</a>
+      <a href="#stats">Stats</a>
+      <a href="#payouts">Payouts</a>
+    </nav>
+    <div class="account-switcher">
+      <span class="dot"></span>
+      TopstepX · 50K
+      <span class="chev">▾</span>
+    </div>
+    <div class="avatar">A</div>
+  </div>
+</div>
+
+<main>
+
+  <!-- ════════════════════════════ DASHBOARD ════════════════════════════ -->
+  <section class="screen-section" id="dashboard">
+    <div class="screen-label">
+      <span class="screen-label-tag">// Screen 01</span>
+      <span class="screen-label-name">Dashboard</span>
+      <span class="screen-label-hint">// The daily command center</span>
+    </div>
+
+    <div class="metric-strip">
+      <div class="metric positive">
+        <div class="metric-label">Today P&amp;L</div>
+        <div class="metric-value">+$1,247.50</div>
+        <div class="metric-sub"><span class="green">▲</span> 6 trades · 5W 1L</div>
+        <svg class="metric-spark" width="60" height="22" viewBox="0 0 60 22"><polyline points="0,16 8,14 16,15 24,10 32,8 40,11 48,5 60,3" fill="none" stroke="var(--green)" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </div>
+      <div class="metric positive">
+        <div class="metric-label">Week P&amp;L</div>
+        <div class="metric-value">+$4,128.00</div>
+        <div class="metric-sub"><span class="green">▲</span> 4 days · 78% win rate</div>
+      </div>
+      <div class="metric accent">
+        <div class="metric-label">Account Equity</div>
+        <div class="metric-value">$52,847</div>
+        <div class="metric-sub mute">TopstepX 50K · trailing $50,000</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Drawdown Used</div>
+        <div class="metric-value">23%</div>
+        <div class="metric-sub mute">$696 / $3,000 daily limit</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">November 2026 · This Month</div>
+          <div class="card-meta">+$11,847 · 14 days traded</div>
+        </div>
+        <div class="cal">
+          <div class="cal-head">Sun</div><div class="cal-head">Mon</div><div class="cal-head">Tue</div><div class="cal-head">Wed</div><div class="cal-head">Thu</div><div class="cal-head">Fri</div><div class="cal-head">Sat</div>
+          <div class="cal-day out"><div class="cal-day-num">26</div></div>
+          <div class="cal-day out"><div class="cal-day-num">27</div></div>
+          <div class="cal-day out"><div class="cal-day-num">28</div></div>
+          <div class="cal-day out"><div class="cal-day-num">29</div></div>
+          <div class="cal-day out"><div class="cal-day-num">30</div></div>
+          <div class="cal-day out"><div class="cal-day-num">31</div></div>
+          <div class="cal-day"><div class="cal-day-num">1</div></div>
+
+          <div class="cal-day"><div class="cal-day-num">2</div></div>
+          <div class="cal-day win"><div class="cal-day-num">3</div><div class="cal-day-pnl">+$412</div><div class="cal-day-cnt">3 TR</div></div>
+          <div class="cal-day loss"><div class="cal-day-num">4</div><div class="cal-day-pnl">-$280</div><div class="cal-day-cnt">2 TR</div></div>
+          <div class="cal-day win-strong"><div class="cal-day-num">5</div><div class="cal-day-pnl">+$1,847</div><div class="cal-day-cnt">7 TR</div></div>
+          <div class="cal-day win"><div class="cal-day-num">6</div><div class="cal-day-pnl">+$634</div><div class="cal-day-cnt">4 TR</div></div>
+          <div class="cal-day win"><div class="cal-day-num">7</div><div class="cal-day-pnl">+$218</div><div class="cal-day-cnt">2 TR</div></div>
+          <div class="cal-day"><div class="cal-day-num">8</div></div>
+
+          <div class="cal-day"><div class="cal-day-num">9</div></div>
+          <div class="cal-day win"><div class="cal-day-num">10</div><div class="cal-day-pnl">+$847</div><div class="cal-day-cnt">5 TR</div></div>
+          <div class="cal-day loss-strong"><div class="cal-day-num">11</div><div class="cal-day-pnl">-$1,140</div><div class="cal-day-cnt">8 TR</div></div>
+          <div class="cal-day win"><div class="cal-day-num">12</div><div class="cal-day-pnl">+$394</div><div class="cal-day-cnt">3 TR</div></div>
+          <div class="cal-day win"><div class="cal-day-num">13</div><div class="cal-day-pnl">+$1,022</div><div class="cal-day-cnt">4 TR</div></div>
+          <div class="cal-day win"><div class="cal-day-num">14</div><div class="cal-day-pnl">+$556</div><div class="cal-day-cnt">3 TR</div></div>
+          <div class="cal-day"><div class="cal-day-num">15</div></div>
+
+          <div class="cal-day"><div class="cal-day-num">16</div></div>
+          <div class="cal-day win-strong"><div class="cal-day-num">17</div><div class="cal-day-pnl">+$2,234</div><div class="cal-day-cnt">6 TR</div></div>
+          <div class="cal-day win"><div class="cal-day-num">18</div><div class="cal-day-pnl">+$682</div><div class="cal-day-cnt">4 TR</div></div>
+          <div class="cal-day loss"><div class="cal-day-num">19</div><div class="cal-day-pnl">-$420</div><div class="cal-day-cnt">3 TR</div></div>
+          <div class="cal-day win"><div class="cal-day-num">20</div><div class="cal-day-pnl">+$894</div><div class="cal-day-cnt">5 TR</div></div>
+          <div class="cal-day win today"><div class="cal-day-num">21</div><div class="cal-day-pnl">+$1,247</div><div class="cal-day-cnt">6 TR</div></div>
+          <div class="cal-day"><div class="cal-day-num">22</div></div>
+
+          <div class="cal-day"><div class="cal-day-num">23</div></div>
+          <div class="cal-day"><div class="cal-day-num">24</div></div>
+          <div class="cal-day"><div class="cal-day-num">25</div></div>
+          <div class="cal-day"><div class="cal-day-num">26</div></div>
+          <div class="cal-day"><div class="cal-day-num">27</div></div>
+          <div class="cal-day"><div class="cal-day-num">28</div></div>
+          <div class="cal-day"><div class="cal-day-num">29</div></div>
+        </div>
+      </div>
+
+      <div class="acct-card featured">
+        <div class="acct-head">
+          <div class="acct-name">
+            <span class="firm">TopstepX · Funded</span>
+            50K Combine
+          </div>
+          <span class="acct-badge live">● Live</span>
+        </div>
+        <div class="acct-equity">Account Equity</div>
+        <div>
+          <span class="acct-equity-val">$52,847</span>
+          <span class="acct-equity-delta green">+$2,847</span>
+        </div>
+        <div class="acct-rules">
+          <div class="rule">
+            <div class="rule-head">
+              <span class="rule-label">Daily Loss Limit</span>
+              <span class="rule-value">$696<span class="target"> / $1,000</span></span>
+            </div>
+            <div class="rule-bar"><div class="rule-bar-fill warn" style="width: 23%"></div></div>
+            <div class="rule-note">// 23% used · safe</div>
+          </div>
+          <div class="rule">
+            <div class="rule-head">
+              <span class="rule-label">Max Drawdown</span>
+              <span class="rule-value">$2,847<span class="target"> above trailing</span></span>
+            </div>
+            <div class="rule-bar"><div class="rule-bar-fill safe" style="width: 95%"></div></div>
+            <div class="rule-note">// $2,847 buffer above $50,000 trailing line</div>
+          </div>
+          <div class="rule">
+            <div class="rule-head">
+              <span class="rule-label">Consistency Rule</span>
+              <span class="rule-value green">PASS<span class="target"> · best day 28%</span></span>
+            </div>
+            <div class="rule-bar"><div class="rule-bar-fill safe" style="width: 100%"></div></div>
+            <div class="rule-note">// best day must be &lt; 30% of total · margin: 2%</div>
+          </div>
+          <div class="rule">
+            <div class="rule-head">
+              <span class="rule-label">Days Until Payout</span>
+              <span class="rule-value">3 days</span>
+            </div>
+            <div class="rule-bar"><div class="rule-bar-fill accent" style="width: 70%"></div></div>
+            <div class="rule-note">// 7 of 10 trading days complete</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top: 20px;">
+      <div class="card-head">
+        <div class="card-title">Recent Trades · Today</div>
+        <div class="card-meta">6 trades · +$1,247.50 net</div>
+      </div>
+      <table class="tbl">
+        <thead><tr><th>Time</th><th>Symbol</th><th>Side</th><th>Qty</th><th>Entry</th><th>Exit</th><th>Hold</th><th>R</th><th>P&amp;L</th><th>Setup</th></tr></thead>
+        <tbody>
+          <tr><td class="ts">15:42:18</td><td class="sym">NQ</td><td class="side-long">LONG</td><td>2</td><td>21,345.25</td><td>21,357.75</td><td class="dim">4m 12s</td><td>+1.8R</td><td class="pnl-pos">+$500.00</td><td><span class="tag-chip">VWAP Retest</span></td></tr>
+          <tr><td class="ts">14:08:51</td><td class="sym">NQ</td><td class="side-short">SHORT</td><td>2</td><td>21,389.50</td><td>21,378.25</td><td class="dim">2m 38s</td><td>+1.5R</td><td class="pnl-pos">+$450.00</td><td><span class="tag-chip green">Single Print</span></td></tr>
+          <tr><td class="ts">12:34:07</td><td class="sym">ES</td><td class="side-long">LONG</td><td>3</td><td>6,142.50</td><td>6,144.75</td><td class="dim">6m 04s</td><td>+0.8R</td><td class="pnl-pos">+$337.50</td><td><span class="tag-chip cyan">VAH Reject</span></td></tr>
+          <tr><td class="ts">11:18:42</td><td class="sym">NQ</td><td class="side-long">LONG</td><td>1</td><td>21,401.00</td><td>21,396.50</td><td class="dim">1m 56s</td><td>-1.0R</td><td class="pnl-neg">-$90.00</td><td><span class="tag-chip">VWAP Retest</span></td></tr>
+          <tr><td class="ts">10:02:33</td><td class="sym">NQ</td><td class="side-short">SHORT</td><td>1</td><td>21,420.25</td><td>21,414.50</td><td class="dim">3m 21s</td><td>+1.3R</td><td class="pnl-pos">+$57.50</td><td><span class="tag-chip">3:55 H Reject</span></td></tr>
+          <tr><td class="ts">09:34:11</td><td class="sym">NQ</td><td class="side-short">SHORT</td><td>1</td><td>21,438.00</td><td>21,432.25</td><td class="dim">2m 09s</td><td>+1.0R</td><td class="pnl-pos">+$57.50</td><td><span class="tag-chip green">NY AM · Absorption</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════ CALENDAR ════════════════════════════ -->
+  <section class="screen-section" id="calendar">
+    <div class="screen-label">
+      <span class="screen-label-tag">// Screen 02</span>
+      <span class="screen-label-name">Calendar</span>
+      <span class="screen-label-hint">// Auto-organized by day</span>
+    </div>
+
+    <div class="card cal-full">
+      <div class="card-head">
+        <div class="cal-toolbar">
+          <button class="nav-btn">‹</button>
+          <span class="month">November 2026</span>
+          <button class="nav-btn">›</button>
+        </div>
+        <div class="cal-summary">
+          <div class="item"><span class="lbl">Days Traded</span><span class="val">14</span></div>
+          <div class="item"><span class="lbl">Winners</span><span class="val green">11</span></div>
+          <div class="item"><span class="lbl">Losers</span><span class="val red">3</span></div>
+          <div class="item"><span class="lbl">Net</span><span class="val green">+$11,847</span></div>
+        </div>
+      </div>
+      <div class="cal">
+        <div class="cal-head">Sun</div><div class="cal-head">Mon</div><div class="cal-head">Tue</div><div class="cal-head">Wed</div><div class="cal-head">Thu</div><div class="cal-head">Fri</div><div class="cal-head">Sat</div>
+        <div class="cal-day out"><div class="cal-day-num">26</div></div>
+        <div class="cal-day out"><div class="cal-day-num">27</div></div>
+        <div class="cal-day out"><div class="cal-day-num">28</div></div>
+        <div class="cal-day out"><div class="cal-day-num">29</div></div>
+        <div class="cal-day out"><div class="cal-day-num">30</div></div>
+        <div class="cal-day out"><div class="cal-day-num">31</div></div>
+        <div class="cal-day"><div class="cal-day-num">1</div></div>
+
+        <div class="cal-day"><div class="cal-day-num">2</div></div>
+        <div class="cal-day win"><div class="cal-day-num">3</div><div class="cal-day-pnl">+$412</div><div class="cal-day-cnt">3 TR · 67%</div></div>
+        <div class="cal-day loss"><div class="cal-day-num">4</div><div class="cal-day-pnl">-$280</div><div class="cal-day-cnt">2 TR · 0%</div></div>
+        <div class="cal-day win-strong"><div class="cal-day-num">5</div><div class="cal-day-pnl">+$1,847</div><div class="cal-day-cnt">7 TR · 86%</div></div>
+        <div class="cal-day win"><div class="cal-day-num">6</div><div class="cal-day-pnl">+$634</div><div class="cal-day-cnt">4 TR · 75%</div></div>
+        <div class="cal-day win"><div class="cal-day-num">7</div><div class="cal-day-pnl">+$218</div><div class="cal-day-cnt">2 TR · 100%</div></div>
+        <div class="cal-day"><div class="cal-day-num">8</div></div>
+
+        <div class="cal-day"><div class="cal-day-num">9</div></div>
+        <div class="cal-day win"><div class="cal-day-num">10</div><div class="cal-day-pnl">+$847</div><div class="cal-day-cnt">5 TR · 60%</div></div>
+        <div class="cal-day loss-strong"><div class="cal-day-num">11</div><div class="cal-day-pnl">-$1,140</div><div class="cal-day-cnt">8 TR · 25%</div></div>
+        <div class="cal-day win"><div class="cal-day-num">12</div><div class="cal-day-pnl">+$394</div><div class="cal-day-cnt">3 TR · 67%</div></div>
+        <div class="cal-day win"><div class="cal-day-num">13</div><div class="cal-day-pnl">+$1,022</div><div class="cal-day-cnt">4 TR · 75%</div></div>
+        <div class="cal-day win"><div class="cal-day-num">14</div><div class="cal-day-pnl">+$556</div><div class="cal-day-cnt">3 TR · 100%</div></div>
+        <div class="cal-day"><div class="cal-day-num">15</div></div>
+
+        <div class="cal-day"><div class="cal-day-num">16</div></div>
+        <div class="cal-day win-strong"><div class="cal-day-num">17</div><div class="cal-day-pnl">+$2,234</div><div class="cal-day-cnt">6 TR · 83%</div></div>
+        <div class="cal-day win"><div class="cal-day-num">18</div><div class="cal-day-pnl">+$682</div><div class="cal-day-cnt">4 TR · 75%</div></div>
+        <div class="cal-day loss"><div class="cal-day-num">19</div><div class="cal-day-pnl">-$420</div><div class="cal-day-cnt">3 TR · 33%</div></div>
+        <div class="cal-day win"><div class="cal-day-num">20</div><div class="cal-day-pnl">+$894</div><div class="cal-day-cnt">5 TR · 80%</div></div>
+        <div class="cal-day win today"><div class="cal-day-num">21</div><div class="cal-day-pnl">+$1,247</div><div class="cal-day-cnt">6 TR · 83%</div></div>
+        <div class="cal-day"><div class="cal-day-num">22</div></div>
+
+        <div class="cal-day"><div class="cal-day-num">23</div></div>
+        <div class="cal-day"><div class="cal-day-num">24</div></div>
+        <div class="cal-day"><div class="cal-day-num">25</div></div>
+        <div class="cal-day"><div class="cal-day-num">26</div></div>
+        <div class="cal-day"><div class="cal-day-num">27</div></div>
+        <div class="cal-day"><div class="cal-day-num">28</div></div>
+        <div class="cal-day"><div class="cal-day-num">29</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════ ACCOUNTS ════════════════════════════ -->
+  <section class="screen-section" id="accounts">
+    <div class="screen-label">
+      <span class="screen-label-tag">// Screen 03</span>
+      <span class="screen-label-name">Prop Account Rules</span>
+      <span class="screen-label-hint">// Multi-account · firm rule tracking · DD warnings</span>
+    </div>
+
+    <div class="grid-2-eq">
+      <div class="acct-card featured">
+        <div class="acct-head">
+          <div class="acct-name">
+            <span class="firm">TopstepX · Funded</span>
+            50K Combine
+          </div>
+          <span class="acct-badge live">● Live</span>
+        </div>
+        <div class="acct-equity">Account Equity</div>
+        <div><span class="acct-equity-val">$52,847</span><span class="acct-equity-delta green">+$2,847</span></div>
+        <div class="acct-rules">
+          <div class="rule">
+            <div class="rule-head"><span class="rule-label">Daily Loss Limit</span><span class="rule-value">$696<span class="target"> / $1,000</span></span></div>
+            <div class="rule-bar"><div class="rule-bar-fill warn" style="width: 23%"></div></div>
+            <div class="rule-note">// 23% used · safe</div>
+          </div>
+          <div class="rule">
+            <div class="rule-head"><span class="rule-label">Max Drawdown</span><span class="rule-value">$2,847<span class="target"> above trailing</span></span></div>
+            <div class="rule-bar"><div class="rule-bar-fill safe" style="width: 95%"></div></div>
+            <div class="rule-note">// $2,847 buffer above $50,000 trailing line</div>
+          </div>
+          <div class="rule">
+            <div class="rule-head"><span class="rule-label">Consistency Rule</span><span class="rule-value green">PASS<span class="target"> · best day 28%</span></span></div>
+            <div class="rule-bar"><div class="rule-bar-fill safe" style="width: 100%"></div></div>
+            <div class="rule-note">// best day must be &lt; 30% of total · margin: 2%</div>
+          </div>
+          <div class="rule">
+            <div class="rule-head"><span class="rule-label">Days Until Payout</span><span class="rule-value">3 days</span></div>
+            <div class="rule-bar"><div class="rule-bar-fill accent" style="width: 70%"></div></div>
+            <div class="rule-note">// 7 of 10 trading days complete</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="acct-card">
+        <div class="acct-head">
+          <div class="acct-name">
+            <span class="firm">Apex · Evaluation</span>
+            100K Eval
+          </div>
+          <span class="acct-badge eval">◆ Eval</span>
+        </div>
+        <div class="acct-equity">Account Equity</div>
+        <div><span class="acct-equity-val">$103,420</span><span class="acct-equity-delta green">+$3,420</span></div>
+        <div class="acct-rules">
+          <div class="rule">
+            <div class="rule-head"><span class="rule-label">Daily Loss Limit</span><span class="rule-value">$0<span class="target"> / $2,500</span></span></div>
+            <div class="rule-bar"><div class="rule-bar-fill safe" style="width: 0%"></div></div>
+            <div class="rule-note">// untouched today</div>
+          </div>
+          <div class="rule">
+            <div class="rule-head"><span class="rule-label">Trailing Threshold</span><span class="rule-value">$3,420<span class="target"> buffer</span></span></div>
+            <div class="rule-bar"><div class="rule-bar-fill safe" style="width: 85%"></div></div>
+            <div class="rule-note">// trailing $5,000 below peak equity</div>
+          </div>
+          <div class="rule">
+            <div class="rule-head"><span class="rule-label">Profit Target</span><span class="rule-value">$3,420<span class="target"> / $6,000</span></span></div>
+            <div class="rule-bar"><div class="rule-bar-fill accent" style="width: 57%"></div></div>
+            <div class="rule-note">// 57% to evaluation pass</div>
+          </div>
+          <div class="rule">
+            <div class="rule-head"><span class="rule-label">Minimum Trading Days</span><span class="rule-value">5 / 7 days</span></div>
+            <div class="rule-bar"><div class="rule-bar-fill accent" style="width: 71%"></div></div>
+            <div class="rule-note">// 2 more required before payout eligibility</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="acct-card" style="margin-top: 20px;">
+      <div class="acct-head">
+        <div class="acct-name">
+          <span class="firm">MyFundedFutures · Funded</span>
+          150K
+        </div>
+        <span class="acct-badge live">● Live</span>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 32px; padding-top: 6px;">
+        <div>
+          <div class="acct-equity">Equity</div>
+          <div><span class="acct-equity-val" style="font-size: 28px;">$154,820</span></div>
+          <div style="margin-top: 6px;"><span class="acct-equity-delta green">+$4,820</span></div>
+        </div>
+        <div>
+          <div class="rule">
+            <div class="rule-head"><span class="rule-label">Daily Loss</span><span class="rule-value">$0<span class="target"> / $3,000</span></span></div>
+            <div class="rule-bar"><div class="rule-bar-fill safe" style="width: 0%"></div></div>
+          </div>
+        </div>
+        <div>
+          <div class="rule">
+            <div class="rule-head"><span class="rule-label">DD Buffer</span><span class="rule-value">$4,820</span></div>
+            <div class="rule-bar"><div class="rule-bar-fill safe" style="width: 80%"></div></div>
+          </div>
+        </div>
+        <div>
+          <div class="rule">
+            <div class="rule-head"><span class="rule-label">Next Payout</span><span class="rule-value">Ready</span></div>
+            <div class="rule-bar"><div class="rule-bar-fill safe" style="width: 100%"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════ JOURNAL ════════════════════════════ -->
+  <section class="screen-section" id="journal">
+    <div class="screen-label">
+      <span class="screen-label-tag">// Screen 04</span>
+      <span class="screen-label-name">Trade Journal Entry</span>
+      <span class="screen-label-hint">// AMT-native tagging · context-aware</span>
+    </div>
+
+    <div class="journal-grid">
+      <div class="trade-detail">
+        <div class="trade-head">
+          <div class="trade-row">
+            <span class="trade-sym">NQ</span>
+            <span class="trade-side long">▲ LONG</span>
+            <span class="trade-pnl green">+$500.00</span>
+          </div>
+          <div class="mono dim" style="font-size: 12px;">Nov 21, 2026 · 15:42:18 → 15:46:30 ET · 2 contracts</div>
+          <div class="trade-stats">
+            <div class="trade-stat"><div class="lbl">Entry</div><div class="val">21,345.25</div></div>
+            <div class="trade-stat"><div class="lbl">Exit</div><div class="val green">21,357.75</div></div>
+            <div class="trade-stat"><div class="lbl">Stop</div><div class="val red">21,338.50</div></div>
+            <div class="trade-stat"><div class="lbl">R Multiple</div><div class="val">+1.85R</div></div>
+          </div>
+        </div>
+        <div class="trade-chart-placeholder">
+          <svg width="100%" height="100%" viewBox="0 0 600 280" preserveAspectRatio="none" style="position: absolute; inset: 0;">
+            <defs>
+              <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="rgba(57,255,20,0.25)"/>
+                <stop offset="100%" stop-color="rgba(57,255,20,0)"/>
+              </linearGradient>
+            </defs>
+            <!-- VWAP line -->
+            <line x1="0" y1="160" x2="600" y2="155" stroke="var(--magenta)" stroke-width="1.2" stroke-dasharray="4 3" opacity="0.7"/>
+            <text x="10" y="150" fill="var(--magenta)" font-family="JetBrains Mono" font-size="9" opacity="0.8">VWAP</text>
+            <!-- entry marker -->
+            <line x1="240" y1="0" x2="240" y2="280" stroke="var(--green)" stroke-width="1" stroke-dasharray="2 4" opacity="0.5"/>
+            <circle cx="240" cy="172" r="6" fill="var(--green)" opacity="0.9"/>
+            <text x="248" y="172" fill="var(--green)" font-family="JetBrains Mono" font-size="10" font-weight="700">LONG @ 21,345.25</text>
+            <!-- exit marker -->
+            <line x1="460" y1="0" x2="460" y2="280" stroke="var(--cyan)" stroke-width="1" stroke-dasharray="2 4" opacity="0.5"/>
+            <circle cx="460" cy="62" r="6" fill="var(--cyan)" opacity="0.9"/>
+            <text x="468" y="62" fill="var(--cyan)" font-family="JetBrains Mono" font-size="10" font-weight="700">EXIT @ 21,357.75</text>
+            <!-- price area -->
+            <path d="M0,180 L40,182 L80,178 L120,184 L160,176 L200,178 L240,172 L260,168 L290,158 L320,162 L350,140 L380,122 L410,108 L440,82 L460,62 L500,68 L540,72 L600,70" fill="url(#g1)" stroke="var(--green)" stroke-width="2"/>
+          </svg>
+          <span class="label" style="position: absolute; bottom: 12px; right: 16px; background: rgba(0,0,0,0.6); padding: 4px 8px; border-radius: 4px;">// 1-min chart preview</span>
+        </div>
+        <div class="trade-tags">
+          <div class="lbl">// Setup Tags · AMT Concepts</div>
+          <span class="tag-chip">VWAP Retest</span>
+          <span class="tag-chip green">Absorption Entry</span>
+          <span class="tag-chip cyan">Single Print Below</span>
+          <span class="tag-chip">NY AM · 09:30-11:00</span>
+          <span class="tag-chip gold">A+ Setup</span>
+        </div>
+      </div>
+
+      <div class="journal-pane">
+        <div class="lbl">// Journal Entry</div>
+        <div class="journal-text">
+          <p><strong>What I saw:</strong> Price pulled back into RTH VWAP after a clean expansion off the open. NY AM killzone. Order flow showed clear absorption on the test &mdash; large bid stacking at 21,343-21,345 absorbing offers without breaking the level.</p>
+          <p><strong>Why I took it:</strong> Three signals aligned. VWAP defended on volume, single print left below from the prior 30-min range, and a clean reclaim candle off the level. Direction was already bullish from yesterday's 3:55 high break.</p>
+          <p><em>The mechanical version of the setup &mdash; no improvising. Waited for the absorption confirmation, didn't pre-empt.</em></p>
+          <p><strong>Execution:</strong> Entered on the reclaim, scaled out half at +1R, held second contract to 21,357. Stop was at the absorption low. Risk: $135. Reward: $500.</p>
+          <p>Could've held longer &mdash; price ran to 21,365 after my exit. Acceptable. Keeping execution tight and the plan intact matters more than catching the last tick.</p>
+        </div>
+        <div class="journal-footer">
+          <span>// Last edited 18:42</span>
+          <span>// 312 words</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════ STATS ════════════════════════════ -->
+  <section class="screen-section" id="stats">
+    <div class="screen-label">
+      <span class="screen-label-tag">// Screen 05</span>
+      <span class="screen-label-name">Statistics</span>
+      <span class="screen-label-hint">// Edge analysis · setup performance · time-of-day</span>
+    </div>
+
+    <div class="metric-strip">
+      <div class="metric"><div class="metric-label">Win Rate</div><div class="metric-value">58.2<span style="font-size: 20px; color: var(--text-dim);">%</span></div><div class="metric-sub mute">187W / 134L · 30 days</div></div>
+      <div class="metric"><div class="metric-label">Profit Factor</div><div class="metric-value">2.14</div><div class="metric-sub mute">$ won / $ lost</div></div>
+      <div class="metric"><div class="metric-label">Avg Winner</div><div class="metric-value">$234</div><div class="metric-sub mute"><span class="green">▲</span> vs $104 avg loser</div></div>
+      <div class="metric positive"><div class="metric-label">Net P&amp;L · 30d</div><div class="metric-value">+$28,640</div><div class="metric-sub mute">across 3 accounts</div></div>
+    </div>
+
+    <div class="stats-grid" style="margin-top: 20px;">
+      <div class="chart-card">
+        <div class="card-head">
+          <div class="card-title">Equity Curve · Last 60 Days</div>
+          <div class="card-meta">All Accounts Combined</div>
+        </div>
+        <div class="chart-wrap">
+          <svg viewBox="0 0 600 240" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="eqgrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="rgba(176,38,255,0.4)"/>
+                <stop offset="100%" stop-color="rgba(176,38,255,0)"/>
+              </linearGradient>
+            </defs>
+            <!-- grid lines -->
+            <line x1="0" y1="60" x2="600" y2="60" stroke="var(--border)" stroke-width="1" stroke-dasharray="2 4"/>
+            <line x1="0" y1="120" x2="600" y2="120" stroke="var(--border)" stroke-width="1" stroke-dasharray="2 4"/>
+            <line x1="0" y1="180" x2="600" y2="180" stroke="var(--border)" stroke-width="1" stroke-dasharray="2 4"/>
+            <!-- area -->
+            <path d="M0,220 L20,215 L40,210 L60,212 L80,200 L100,198 L120,190 L140,178 L160,182 L180,165 L200,170 L220,152 L240,140 L260,148 L280,128 L300,118 L320,108 L340,114 L360,98 L380,90 L400,72 L420,82 L440,58 L460,62 L480,42 L500,46 L520,32 L540,28 L560,22 L580,18 L600,12 L600,240 L0,240 Z" fill="url(#eqgrad)"/>
+            <!-- line -->
+            <path d="M0,220 L20,215 L40,210 L60,212 L80,200 L100,198 L120,190 L140,178 L160,182 L180,165 L200,170 L220,152 L240,140 L260,148 L280,128 L300,118 L320,108 L340,114 L360,98 L380,90 L400,72 L420,82 L440,58 L460,62 L480,42 L500,46 L520,32 L540,28 L560,22 L580,18 L600,12" fill="none" stroke="var(--magenta)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <!-- labels -->
+            <text x="6" y="58" fill="var(--text-mute)" font-family="JetBrains Mono" font-size="9">$70K</text>
+            <text x="6" y="118" fill="var(--text-mute)" font-family="JetBrains Mono" font-size="9">$50K</text>
+            <text x="6" y="178" fill="var(--text-mute)" font-family="JetBrains Mono" font-size="9">$30K</text>
+          </svg>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="card-head">
+          <div class="card-title">Win Rate by Setup</div>
+          <div class="card-meta">30 day</div>
+        </div>
+        <div class="setup-bars">
+          <div class="setup-bar"><span class="nm">VWAP Retest</span><div class="bar"><div class="fill" style="width: 72%"></div></div><span class="pct">72%</span></div>
+          <div class="setup-bar"><span class="nm">3:55 H Reject</span><div class="bar"><div class="fill" style="width: 67%"></div></div><span class="pct">67%</span></div>
+          <div class="setup-bar"><span class="nm">Single Print</span><div class="bar"><div class="fill" style="width: 64%"></div></div><span class="pct">64%</span></div>
+          <div class="setup-bar"><span class="nm">VAH Reject</span><div class="bar"><div class="fill" style="width: 58%"></div></div><span class="pct">58%</span></div>
+          <div class="setup-bar"><span class="nm">NY AM · Absorb</span><div class="bar"><div class="fill" style="width: 55%"></div></div><span class="pct">55%</span></div>
+          <div class="setup-bar"><span class="nm">TDO Reclaim</span><div class="bar"><div class="fill" style="width: 48%"></div></div><span class="pct">48%</span></div>
+          <div class="setup-bar"><span class="nm">Lunch Fade</span><div class="bar"><div class="fill" style="width: 36%"></div></div><span class="pct">36%</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats-grid" style="margin-top: 20px; grid-template-columns: 1fr 1.4fr;">
+      <div class="chart-card">
+        <div class="card-head">
+          <div class="card-title">P&amp;L by Hour</div>
+          <div class="card-meta">ET · NY hours</div>
+        </div>
+        <div class="tod-bars">
+          <div class="tod-bar"><div class="barv pos" style="height: 78%"></div><span class="lbl">9:30</span></div>
+          <div class="tod-bar"><div class="barv pos" style="height: 92%"></div><span class="lbl">10</span></div>
+          <div class="tod-bar"><div class="barv pos" style="height: 64%"></div><span class="lbl">11</span></div>
+          <div class="tod-bar"><div class="barv neg" style="height: 22%"></div><span class="lbl">12</span></div>
+          <div class="tod-bar"><div class="barv neg" style="height: 34%"></div><span class="lbl">13</span></div>
+          <div class="tod-bar"><div class="barv pos" style="height: 28%"></div><span class="lbl">14</span></div>
+          <div class="tod-bar"><div class="barv pos" style="height: 56%"></div><span class="lbl">15</span></div>
+          <div class="tod-bar"><div class="barv pos" style="height: 72%"></div><span class="lbl">15:55</span></div>
+        </div>
+        <div class="mono dim" style="font-size: 10px; margin-top: 14px; letter-spacing: 0.1em;">// Strongest edge: 09:30&ndash;11:00 ET · weakest: lunch fades</div>
+      </div>
+
+      <div class="chart-card">
+        <div class="card-head">
+          <div class="card-title">Key Metrics</div>
+          <div class="card-meta">30 day</div>
+        </div>
+        <div class="kpi-grid">
+          <div class="kpi"><div class="lbl">Expectancy</div><div class="val green">+$71</div><div class="delta">per trade</div></div>
+          <div class="kpi"><div class="lbl">Sharpe Ratio</div><div class="val">1.92</div><div class="delta">excellent</div></div>
+          <div class="kpi"><div class="lbl">Largest DD</div><div class="val red">-$1,847</div><div class="delta">Nov 11 · 1 day</div></div>
+          <div class="kpi"><div class="lbl">Max Win Streak</div><div class="val green">11</div><div class="delta">trades</div></div>
+          <div class="kpi"><div class="lbl">Avg Hold (Win)</div><div class="val">4m 22s</div><div class="delta">scalp range</div></div>
+          <div class="kpi"><div class="lbl">Avg Hold (Loss)</div><div class="val">1m 48s</div><div class="delta">cut quickly</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════ PAYOUTS ════════════════════════════ -->
+  <section class="screen-section" id="payouts">
+    <div class="screen-label">
+      <span class="screen-label-tag">// Screen 06</span>
+      <span class="screen-label-name">Payout Tracker</span>
+      <span class="screen-label-hint">// Lifetime · projected · per-account</span>
+    </div>
+
+    <div class="metric-strip payout-strip">
+      <div class="metric gold"><div class="metric-label">Total Paid Out</div><div class="metric-value">$14,250</div><div class="metric-sub mute">8 payouts · 3 accounts</div></div>
+      <div class="metric positive"><div class="metric-label">Next Payout (Projected)</div><div class="metric-value">$2,847</div><div class="metric-sub mute">TopstepX 50K · 3 days away</div></div>
+      <div class="metric"><div class="metric-label">Days to Payable</div><div class="metric-value">3</div><div class="metric-sub mute">7 of 10 days complete</div></div>
+      <div class="metric accent"><div class="metric-label">Accounts Eligible</div><div class="metric-value">2 / 3</div><div class="metric-sub mute">1 still in eval</div></div>
+    </div>
+
+    <div class="payout-progress">
+      <div class="card-head">
+        <div class="card-title">Per-Account Payout Status</div>
+        <div class="card-meta">Live snapshot</div>
+      </div>
+      <div class="payout-acct-row">
+        <div class="payout-acct-name">50K Combine<span class="firm">TopstepX · Funded</span></div>
+        <div><div class="lbl">Projected</div><div class="val green">+$2,847</div></div>
+        <div><div class="lbl">Days Complete</div><div class="val">7 / 10</div></div>
+        <div><span class="payout-status locked">⏱ Locked · 3 days</span></div>
+      </div>
+      <div class="payout-acct-row">
+        <div class="payout-acct-name">150K<span class="firm">MyFundedFutures · Funded</span></div>
+        <div><div class="lbl">Projected</div><div class="val green">+$4,820</div></div>
+        <div><div class="lbl">Days Complete</div><div class="val">14 / 14</div></div>
+        <div><span class="payout-status ready">● Ready · Request Now</span></div>
+      </div>
+      <div class="payout-acct-row">
+        <div class="payout-acct-name">100K Eval<span class="firm">Apex · Evaluation</span></div>
+        <div><div class="lbl">Profit Target</div><div class="val">$3,420 / $6,000</div></div>
+        <div><div class="lbl">Days Complete</div><div class="val">5 / 7</div></div>
+        <div><span class="payout-status waiting">◯ Not yet funded</span></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top: 20px;">
+      <div class="card-head">
+        <div class="card-title">Payout History</div>
+        <div class="card-meta">Lifetime · $14,250 total</div>
+      </div>
+      <table class="tbl">
+        <thead><tr><th>Date</th><th>Account</th><th>Firm</th><th>Amount</th><th>Method</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td class="ts">Nov 03, 2026</td><td class="sym">50K Combine</td><td class="dim">TopstepX</td><td class="pnl-pos">+$2,140.00</td><td class="dim">ACH · Bank</td><td><span class="payout-status ready">Paid</span></td></tr>
+          <tr><td class="ts">Oct 20, 2026</td><td class="sym">150K</td><td class="dim">MyFundedFutures</td><td class="pnl-pos">+$3,580.00</td><td class="dim">ACH · Bank</td><td><span class="payout-status ready">Paid</span></td></tr>
+          <tr><td class="ts">Oct 06, 2026</td><td class="sym">50K Combine</td><td class="dim">TopstepX</td><td class="pnl-pos">+$1,820.00</td><td class="dim">ACH · Bank</td><td><span class="payout-status ready">Paid</span></td></tr>
+          <tr><td class="ts">Sep 22, 2026</td><td class="sym">150K</td><td class="dim">MyFundedFutures</td><td class="pnl-pos">+$2,140.00</td><td class="dim">ACH · Bank</td><td><span class="payout-status ready">Paid</span></td></tr>
+          <tr><td class="ts">Sep 08, 2026</td><td class="sym">50K Combine</td><td class="dim">TopstepX</td><td class="pnl-pos">+$1,940.00</td><td class="dim">Wire</td><td><span class="payout-status ready">Paid</span></td></tr>
+          <tr><td class="ts">Aug 25, 2026</td><td class="sym">50K Combine</td><td class="dim">TopstepX</td><td class="pnl-pos">+$1,420.00</td><td class="dim">ACH · Bank</td><td><span class="payout-status ready">Paid</span></td></tr>
+          <tr><td class="ts">Aug 11, 2026</td><td class="sym">150K</td><td class="dim">MyFundedFutures</td><td class="pnl-pos">+$840.00</td><td class="dim">ACH · Bank</td><td><span class="payout-status ready">Paid</span></td></tr>
+          <tr><td class="ts">Jul 28, 2026</td><td class="sym">50K Combine</td><td class="dim">TopstepX</td><td class="pnl-pos">+$370.00</td><td class="dim">ACH · Bank</td><td><span class="payout-status ready">Paid</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</main>
+
+</body>
+</html>
